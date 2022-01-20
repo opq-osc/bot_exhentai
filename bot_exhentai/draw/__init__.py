@@ -1,0 +1,1 @@
+from .index_page import DrawIndexPage
