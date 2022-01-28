@@ -5,11 +5,11 @@ from typing import List
 from functools import lru_cache
 import httpx
 from .files.config import config
+
 # curFileDir = Path(__file__).parent  # 当前文件路径
 
 headers = config.headers
 cookies = config.cookies
-
 
 
 def ex_search(keywords: str, page: int = 0) -> tuple:
@@ -55,7 +55,7 @@ def get_download_page_url(archive_url: str) -> str:
     return download_choose_page_url
 
 
-def get_download_zipfile_url(download_page_url: str, original: bool = False) -> str:
+def get_download_zipfile_url(download_page_url: str, original: bool = False):
     """
     返回zip压缩包的下载链接
     :param download_page_url: 选择画质的下载页面链接
@@ -75,13 +75,15 @@ def get_download_zipfile_url(download_page_url: str, original: bool = False) -> 
     download_url = re.search(r'\"Please wait\.\.\.\";.*?document\.location = \"(.*?)\";', download_url_data_last,
                              flags=re.S).group(1)  # 提取下载链接
     print(download_url)
-    return download_url + "?start=1"
+    filename_info = httpx.get(download_url, headers=headers, cookies=cookies).text
+    filename = re.search(r'<strong>(.*?)</strong>', filename_info).group(1)
+    return download_url + "?start=1", filename
 
 
 def get_archive_tags(url: str):
     print(url)
     html = get_archive_html(url)
-    tags = re.findall(r"toggle_tagmenu\('(.*?)',this\)", html,flags=re.S)  # 提取tag
+    tags = re.findall(r"toggle_tagmenu\('(.*?)',this\)", html, flags=re.S)  # 提取tag
     return tags
 
 

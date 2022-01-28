@@ -48,9 +48,9 @@ def receive():
         else:
             session.send_text(f"当前页数{ex.now_page},无法翻页")
     elif info := re.match(r"详细信息 ?(\d+)", ctx.Content):
-        ex.get_more_info(int(info[1])+1)
+        ex.get_more_info(int(info[1]) + 1)
     elif info := re.match(r"下载 ?(\d+)", ctx.Content):
-        ex.add_download_job(int(info[1]))
+        ex.add_download_job(ctx.FromGroupId, int(info[1])-1)
 
 
 @handler_ex.handle
@@ -74,4 +74,3 @@ def main():
         word = session.pop("word", wait=True)
         if word == "退出":
             handler_ex.finish("已退出")
-

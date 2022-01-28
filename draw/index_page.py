@@ -177,7 +177,7 @@ class DrawIndexPage:
         for i in range(self.counts):
             draw.multiline_text(self.text_coordinates[i], text=self.processed_texts[i], font=self.font, fill='black')
         print(time.time() - start_time)
-        background.show()
+        # background.show()
         with BytesIO() as bf:
             background.save(bf, format="JPEG", quality=80)
             return base64.b64encode(bf.getvalue()).decode()

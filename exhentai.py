@@ -1,13 +1,19 @@
-from .api import ex_search, get_archive_tags
+import httpx
+
+from .api import ex_search, get_archive_tags, get_download_page_url, get_download_zipfile_url
 from .draw import DrawIndexPage
+from .tools import DownloadArchive
 from pathlib import Path
 import json
 from typing import List
+import time
 
 curFileDir = Path(__file__).parent  # 当前文件路径
 
 with open(curFileDir / "files" / "tagDB.json", "r", encoding="utf-8") as f:
     tag_db: dict = json.load(f)
+
+exitFlag = 0
 
 
 class Exhentai:
@@ -70,6 +76,9 @@ class Exhentai:
         tags = get_archive_tags(url=self.archive_urls[index])
         print(self._conversion_tags(tags))
 
-
-    def add_download_job(self, index, file_type: str = "zip"):
-        pass
+    def add_download_job(self,ctx, index: int, file_type: str = "zip"):
+        if index < 0 or index > len(self.archives):
+            return False
+        download_page_url = get_download_page_url(self.archive_urls[index])
+        download_url, filename = get_download_zipfile_url(download_page_url)
+        DownloadArchive(ctx,download_url, filename).start()
