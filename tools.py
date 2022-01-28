@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Union
 import httpx
+import pyzipper
+from botoy.contrib import get_cache_dir
 from tenacity import AsyncRetrying, RetryError, stop_after_attempt
 from tenacity import retry, stop_after_attempt, wait_random
 from botoy.pool import WorkerPool
@@ -27,23 +29,45 @@ def download_to_bytes(url, client: httpx.Client) -> bytes:
 
 
 class DownloadArchive(threading.Thread):
-    def __init__(self, groupid, url, filename):
+    def __init__(self, groupid, url, filename: str):
         threading.Thread.__init__(self)
         self._daemonic = False
         self.groupid = groupid
         self.url = url
         self.filename = filename
         self.filePath = curFileDir / "download" / self.filename
+        self.pic_cache_dir = get_cache_dir(filename)
+        self.zip_cache_dir = get_cache_dir("zip")
+        self.action = Action(jconfig.bot, host=jconfig.host, port=jconfig.port)
+
+    def encryption_zip_aes(self):
+        if not pyzipper.is_zipfile(self.filePath):
+            self.action.sendGroupText(self.groupid, "解压出错")
+            return
+        with pyzipper.ZipFile(self.filePath, 'r') as f:
+            f.extractall(self.pic_cache_dir)
+        files = [_ for _ in self.pic_cache_dir.iterdir()]
+        print(files)
+        with pyzipper.AESZipFile(self.zip_cache_dir / self.filename, "w", compression=pyzipper.ZIP_BZIP2,
+                                 compresslevel=9) as zf:
+            zf.setpassword(self.filename.encode())
+            zf.setencryption(pyzipper.WZ_AES, nbits=128)
+            for file in files:
+                zf.write(filename=file, arcname=file.name)
 
     def send(self):
-        action = Action(jconfig.bot, host=jconfig.host, port=jconfig.port)
+        self.encryption_zip_aes()
+        self.action.sendGroupText(self.groupid,
+                                  f"{self.filename}\r\n大小:{Path(self.zip_cache_dir / self.filename).stat().st_size / 1024 / 1024}MB\r\n下载完成,上传ing")
         logger.warning("开始上传群文件")
-        # action.uploadGroupFile(self.groupid, filePath="/root/health_sign/testfile.txt")
-        action.uploadGroupFile(self.groupid, filePath=str(self.filePath))
+        # self.action.uploadGroupFile(self.groupid, filePath="/root/health_sign/testfile.txt")
+        self.action.uploadGroupFile(self.groupid, filePath=str(self.zip_cache_dir / self.filename))
+        self.action.sendGroupText(self.groupid, "解压密码为文件名")
 
     @retry(stop=stop_after_attempt(3), retry_error_callback=lambda
             retry_state: print("下载error"))
     def downlaod(self):
+        self.action.sendGroupText(self.groupid, "开始下载,请耐心等待~")
         logger.warning(f"开始下载{self.filename}")
         res = httpx.get(self.url, headers=headers, cookies=cookies).content
         with open(self.filePath, 'wb') as f:
