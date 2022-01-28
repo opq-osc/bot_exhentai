@@ -102,13 +102,16 @@ class DrawIndexPage:
             text_finally: str = ""
             # text_height_finally: int = 0
             for char in self.texts[i]:
+                # print(char)
                 text_tmp += char
                 text_width, text_height = self.font.getsize(text_tmp)
                 if text_width > self.images[i].size[0]:
                     # print(text_width, pics[i].size[0])
                     text_finally += (text_tmp[:-1] if text_finally == "" else text_tmp[1:-1]) + "\n" + text_tmp[-1]
                     text_tmp = text_tmp[-1]
-            if text_tmp[1:] != "":
+            if text_tmp[1:] != "" and text_finally == "":
+                text_finally += text_tmp
+            elif text_tmp[1:] != "" and text_finally != "":
                 text_finally += text_tmp[1:]
             self.processed_texts.append(text_finally)
         # return text_list_finally
@@ -176,6 +179,7 @@ class DrawIndexPage:
             background.paste(self.images[i], (self.pic_coordinates[i][0], self.pic_coordinates[i][1]))
         draw = ImageDraw.Draw(background)
         for i in range(self.counts):
+            print(self.processed_texts[i])
             draw.multiline_text(self.text_coordinates[i], text=self.processed_texts[i], font=self.font, fill='black')
         print(time.time() - start_time)
         # background.show()
