@@ -10,6 +10,7 @@ from botoy import logger, Action, GroupMsg, FriendMsg, jconfig
 import threading
 from .files.config import config
 from ._proxies import transport, proxies
+from botoy.session.globals import _ctx
 
 # curFileDir = Path(__file__).parent  # 当前文件路径
 
@@ -34,6 +35,7 @@ class DownloadArchive(threading.Thread):
         threading.Thread.__init__(self)
         self._daemonic = False
         self.groupid = groupid
+        self.ctx = _ctx.get()
         self.url = url
         self.filename = filename
         self.filePath = curFileDir / "download" / self.filename
@@ -48,18 +50,20 @@ class DownloadArchive(threading.Thread):
         with pyzipper.ZipFile(self.filePath, 'r') as f:
             f.extractall(self.pic_cache_dir)
         files = [_ for _ in self.pic_cache_dir.iterdir()]
-        print(files)
+        # print(files)
         with pyzipper.AESZipFile(self.zip_cache_dir / self.filename, "w", compression=pyzipper.ZIP_BZIP2,
                                  compresslevel=9) as zf:
-            zf.setpassword(self.filename.encode())
+            zf.setpassword(str(self.ctx.CurrentQQ).encode())
             zf.setencryption(pyzipper.WZ_AES, nbits=128)
             for file in files:
                 zf.write(filename=file, arcname=file.name)
 
     def send(self):
         self.encryption_zip_aes()
-        self.action.sendGroupText(self.groupid,
-                                  f"{self.filename}\r\n大小:{round(Path(self.zip_cache_dir / self.filename).stat().st_size / 1024 / 1024, 2)}MB\r\n解压密码为压缩包文件名")
+        self.action.sendGroupText(
+            self.groupid,
+            f"{self.filename}\r\n大小:{round(Path(self.zip_cache_dir / self.filename).stat().st_size / 1024 / 1024, 2)}MB\r\n解压密码为Bot的QQ号"
+        )
         logger.warning("开始上传群文件")
         # self.action.uploadGroupFile(self.groupid, filePath="/root/health_sign/testfile.txt")
         self.action.uploadGroupFile(self.groupid, filePath=str(self.zip_cache_dir / self.filename))
@@ -69,7 +73,7 @@ class DownloadArchive(threading.Thread):
     def downlaod(self):
         self.action.sendGroupText(self.groupid, "开始下载,请耐心等待~")
         logger.warning(f"开始下载{self.filename}")
-        with httpx.Client( headers=headers, cookies=cookies, proxies=proxies, transport=transport) as client:
+        with httpx.Client(headers=headers, cookies=cookies, proxies=proxies, transport=transport) as client:
             res = client.get(self.url).content
             with open(self.filePath, 'wb') as f:
                 f.write(res)
