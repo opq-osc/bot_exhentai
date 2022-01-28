@@ -39,7 +39,7 @@ class DownloadArchive(threading.Thread):
         action = Action(jconfig.bot, host=jconfig.host, port=jconfig.port)
         logger.warning("开始上传群文件")
         # action.uploadGroupFile(self.groupid, filePath="/root/health_sign/testfile.txt")
-        action.uploadGroupFile(self.groupid, filePath=self.filePath)
+        action.uploadGroupFile(self.groupid, filePath=str(self.filePath))
 
     @retry(stop=stop_after_attempt(3), retry_error_callback=lambda
             retry_state: print("下载error"))
