@@ -36,8 +36,8 @@ class DownloadArchive(threading.Thread):
         self.url = url
         self.filename = filename
         self.filePath = curFileDir / "download" / self.filename
-        self.pic_cache_dir = get_cache_dir(filename)
-        self.zip_cache_dir = get_cache_dir("zip")
+        self.pic_cache_dir = get_cache_dir(filename).absolute()
+        self.zip_cache_dir = get_cache_dir("zip").absolute()
         self.action = Action(jconfig.bot, host=jconfig.host, port=jconfig.port)
 
     def encryption_zip_aes(self):
@@ -58,11 +58,10 @@ class DownloadArchive(threading.Thread):
     def send(self):
         self.encryption_zip_aes()
         self.action.sendGroupText(self.groupid,
-                                  f"{self.filename}\r\n大小:{Path(self.zip_cache_dir / self.filename).stat().st_size / 1024 / 1024}MB\r\n下载完成,上传ing")
+                                  f"{self.filename}\r\n大小:{round(Path(self.zip_cache_dir / self.filename).stat().st_size / 1024 / 1024, 2)}MB\r\n下载完成,上传ing\r\n解压密码为压缩包文件名")
         logger.warning("开始上传群文件")
         # self.action.uploadGroupFile(self.groupid, filePath="/root/health_sign/testfile.txt")
         self.action.uploadGroupFile(self.groupid, filePath=str(self.zip_cache_dir / self.filename))
-        self.action.sendGroupText(self.groupid, "解压密码为文件名")
 
     @retry(stop=stop_after_attempt(3), retry_error_callback=lambda
             retry_state: print("下载error"))
