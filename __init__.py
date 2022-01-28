@@ -50,7 +50,7 @@ def receive():
     elif info := re.match(r"详细信息 ?(\d+)", ctx.Content):
         ex.get_more_info(int(info[1]) + 1)
     elif info := re.match(r"下载 ?(\d+)", ctx.Content):
-        ex.add_download_job(ctx.FromGroupId, int(info[1])-1)
+        ex.add_download_job(ctx.FromGroupId, int(info[1]) - 1)
 
 
 @handler_ex.handle
@@ -71,6 +71,6 @@ def main():
             session.send_text("无结果")
     session.set("flag", True)
     while True:
-        word = session.pop("word", wait=True)
+        word = session.pop("word", wait=True, timeout=30, default="退出")
         if word == "退出":
             handler_ex.finish("已退出")
