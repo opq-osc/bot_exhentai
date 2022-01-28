@@ -9,6 +9,7 @@ from botoy.pool import WorkerPool
 from botoy import logger, Action, GroupMsg, FriendMsg, jconfig
 import threading
 from .files.config import config
+from ._proxies import transport, proxies
 
 # curFileDir = Path(__file__).parent  # 当前文件路径
 
@@ -58,7 +59,7 @@ class DownloadArchive(threading.Thread):
     def send(self):
         self.encryption_zip_aes()
         self.action.sendGroupText(self.groupid,
-                                  f"{self.filename}\r\n大小:{round(Path(self.zip_cache_dir / self.filename).stat().st_size / 1024 / 1024, 2)}MB\r\n下载完成,上传ing\r\n解压密码为压缩包文件名")
+                                  f"{self.filename}\r\n大小:{round(Path(self.zip_cache_dir / self.filename).stat().st_size / 1024 / 1024, 2)}MB\r\n解压密码为压缩包文件名")
         logger.warning("开始上传群文件")
         # self.action.uploadGroupFile(self.groupid, filePath="/root/health_sign/testfile.txt")
         self.action.uploadGroupFile(self.groupid, filePath=str(self.zip_cache_dir / self.filename))
@@ -68,9 +69,10 @@ class DownloadArchive(threading.Thread):
     def downlaod(self):
         self.action.sendGroupText(self.groupid, "开始下载,请耐心等待~")
         logger.warning(f"开始下载{self.filename}")
-        res = httpx.get(self.url, headers=headers, cookies=cookies).content
-        with open(self.filePath, 'wb') as f:
-            f.write(res)
+        with httpx.Client( headers=headers, cookies=cookies, proxies=proxies, transport=transport) as client:
+            res = client.get(self.url).content
+            with open(self.filePath, 'wb') as f:
+                f.write(res)
         logger.warning(f"{self.filename}下载完成")
 
     def run(self):

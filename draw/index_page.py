@@ -11,6 +11,7 @@ from botoy.pool import WorkerPool
 from tenacity import retry, stop_after_attempt
 from ..files.config import config
 from ..tools import download_to_bytes
+from .._proxies import transport, proxies
 
 curFileDir = Path(__file__).parent  # 当前文件路径
 
@@ -42,7 +43,7 @@ class DrawIndexPage:
         下载所有封面
         :return:
         """
-        with httpx.Client(headers=headers, cookies=cookies) as client:
+        with httpx.Client(headers=headers, cookies=cookies, proxies=proxies, transport=transport) as client:
             for pic_bytes in self.pool.map(partial(download_to_bytes, client=client), self.image_urls):
                 if type(pic_bytes) != str:
                     self.images.append(Image.open(BytesIO(pic_bytes)).convert('RGB'))

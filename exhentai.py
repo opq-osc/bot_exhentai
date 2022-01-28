@@ -1,6 +1,6 @@
 import httpx
 
-from .api import ex_search, get_archive_tags, get_download_page_url, get_download_zipfile_url
+from .api import ExApi
 from .draw import DrawIndexPage
 from .tools import DownloadArchive
 from pathlib import Path
@@ -15,6 +15,7 @@ with open(curFileDir / "files" / "tagDB.json", "r", encoding="utf-8") as f:
 
 exitFlag = 0
 
+ex_api = ExApi()
 
 class Exhentai:
     def __init__(self):
@@ -43,7 +44,7 @@ class Exhentai:
 
     def search(self, keyword, page=0):
         self.search_keyword = keyword
-        res = ex_search(keyword, page)
+        res = ex_api.ex_search(keyword, page)
         self._update_info(res[0], page, res[1] - 1)
         if self.archives == []:
             return False
@@ -73,12 +74,12 @@ class Exhentai:
     def get_more_info(self, index):
         if index < 0 or index > len(self.archives):
             return False
-        tags = get_archive_tags(url=self.archive_urls[index])
+        tags = ex_api.get_archive_tags(url=self.archive_urls[index])
         print(self._conversion_tags(tags))
 
     def add_download_job(self,ctx, index: int, file_type: str = "zip"):
         if index < 0 or index > len(self.archives):
             return False
-        download_page_url = get_download_page_url(self.archive_urls[index])
-        download_url, filename = get_download_zipfile_url(download_page_url)
+        download_page_url = ex_api.get_download_page_url(self.archive_urls[index])
+        download_url, filename = ex_api.get_download_zipfile_url(download_page_url)
         DownloadArchive(ctx,download_url, filename).start()
