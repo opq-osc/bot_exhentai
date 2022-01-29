@@ -40,7 +40,7 @@ class DownloadArchive(threading.Thread):
         self.filename = filename
         # self.filePath = curFileDir / "download" / self.filename
         self.pic_cache_dir = get_cache_dir(filename).absolute()
-        self.zip_cache_dir = (get_cache_dir("zip") / self.filename).absolute()
+        self.zip_cache_dir = (get_cache_dir("zip") / self.filename).absolute()  # 按群号独立出来
         self.action = Action(jconfig.bot, host=jconfig.host, port=jconfig.port)
 
     def encryption_zip_aes(self):
@@ -52,8 +52,8 @@ class DownloadArchive(threading.Thread):
         files = [_ for _ in self.pic_cache_dir.iterdir()]
         # print(files)
         self.zip_cache_dir.unlink()  # 删除无密码的压缩包
-        with pyzipper.AESZipFile(self.zip_cache_dir, "w", compression=pyzipper.ZIP_BZIP2,
-                                 compresslevel=9) as zf:
+        with pyzipper.AESZipFile(self.zip_cache_dir, "w", compression=pyzipper.ZIP_DEFLATED,
+                                 compresslevel=6) as zf:
             zf.setpassword(str(self.ctx.CurrentQQ).encode())
             zf.setencryption(pyzipper.WZ_AES, nbits=128)
             for file in files:
@@ -65,7 +65,7 @@ class DownloadArchive(threading.Thread):
         self.encryption_zip_aes()
         self.action.sendGroupText(
             self.groupid,
-            f"{self.filename}\r\n大小:{round(Path(self.zip_cache_dir).stat().st_size / 1024 / 1024, 2)}MB\r\n解压密码为Bot的QQ号"
+            f"{self.filename}\r\n大小:{round(self.zip_cache_dir.stat().st_size / 1024 / 1024, 2)}MB\r\n解压密码为Bot的QQ号"
         )
         logger.warning("开始上传群文件")
         # self.action.uploadGroupFile(self.groupid, filePath="/root/health_sign/testfile.txt")
