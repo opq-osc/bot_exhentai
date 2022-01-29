@@ -1,16 +1,15 @@
+import threading
 from pathlib import Path
-from typing import Union
+
 import httpx
 import pyzipper
+from botoy import logger, Action, jconfig
 from botoy.contrib import get_cache_dir
-from tenacity import AsyncRetrying, RetryError, stop_after_attempt
-from tenacity import retry, stop_after_attempt, wait_random
-from botoy.pool import WorkerPool
-from botoy import logger, Action, GroupMsg, FriendMsg, jconfig
-import threading
-from .files.config import config
-from ._proxies import transport, proxies
 from botoy.session.globals import _ctx
+from tenacity import retry, stop_after_attempt
+
+from ._proxies import transport, proxies
+from .files.config import config
 
 # curFileDir = Path(__file__).parent  # 当前文件路径
 

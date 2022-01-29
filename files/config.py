@@ -1,7 +1,8 @@
 import json
-from pydantic import BaseModel
 from pathlib import Path
+
 from botoy import logger
+from pydantic import BaseModel
 
 
 class Config(BaseModel):

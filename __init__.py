@@ -1,17 +1,8 @@
 import re
-from pathlib import Path
 
-import httpx
-from aiofile import async_open
-from botoy import AsyncAction
-from botoy import GroupMsg, logger
-from botoy import async_decorators as deco
-from botoy.collection import MsgTypes
+from botoy.decorators import ignore_botself, startswith
 from botoy.session import SessionHandler, ctx, session
-from botoy.parser import group as gp
-from tenacity import AsyncRetrying, RetryError, stop_after_attempt
-from tenacity import retry, stop_after_attempt, wait_random
-from botoy.decorators import ignore_botself, startswith, from_these_groups
+
 from .exhentai import Exhentai
 
 __doc__ = "ExHentai的一些功能"

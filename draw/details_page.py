@@ -1,15 +1,6 @@
-import base64
-import time
-from io import BytesIO
 from pathlib import Path
-from typing import List
 
-import httpx
-from PIL import Image, ImageDraw, ImageFont
-from botoy import logger
-from botoy.pool import WorkerPool
-from tenacity import retry, stop_after_attempt
-from ..files.config import config
+from PIL import ImageFont
 
 curFileDir = Path(__file__).parent  # 当前文件路径
 

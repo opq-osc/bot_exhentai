@@ -1,11 +1,11 @@
 import re
 import time
-from pathlib import Path
-from typing import List
 from functools import lru_cache
+
 import httpx
-from .files.config import config
+
 from ._proxies import transport, proxies
+from .files.config import config
 
 # curFileDir = Path(__file__).parent  # 当前文件路径
 

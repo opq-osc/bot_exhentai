@@ -1,17 +1,18 @@
 import base64
 import time
+from functools import partial
 from io import BytesIO
 from pathlib import Path
 from typing import List
-from functools import partial
+
 import httpx
 from PIL import Image, ImageDraw, ImageFont
 from botoy import logger
 from botoy.pool import WorkerPool
-from tenacity import retry, stop_after_attempt
+
+from .._proxies import transport, proxies
 from ..files.config import config
 from ..tools import download_to_bytes
-from .._proxies import transport, proxies
 
 curFileDir = Path(__file__).parent  # 当前文件路径
 

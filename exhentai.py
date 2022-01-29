@@ -1,19 +1,15 @@
-import httpx
+import json
+from pathlib import Path
 
 from .api import ExApi
 from .draw import DrawIndexPage
 from .tools import DownloadArchive
-from pathlib import Path
-import json
-from typing import List
-import time
 
 curFileDir = Path(__file__).parent  # 当前文件路径
 
 with open(curFileDir / "files" / "tagDB.json", "r", encoding="utf-8") as f:
     tag_db: dict = json.load(f)
 
-exitFlag = 0
 
 ex_api = ExApi()
 

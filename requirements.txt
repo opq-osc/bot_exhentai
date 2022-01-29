@@ -1,0 +1,7 @@
+botoy
+httpx
+httpx_socks
+pyzipper
+pydantic
+Pillow
+tenacity
