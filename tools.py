@@ -1,3 +1,4 @@
+import shutil
 import threading
 from pathlib import Path
 
@@ -37,35 +38,38 @@ class DownloadArchive(threading.Thread):
         self.ctx = _ctx.get()
         self.url = url
         self.filename = filename
-        self.filePath = curFileDir / "download" / self.filename
+        # self.filePath = curFileDir / "download" / self.filename
         self.pic_cache_dir = get_cache_dir(filename).absolute()
-        self.zip_cache_dir = get_cache_dir("zip").absolute()
+        self.zip_cache_dir = (get_cache_dir("zip") / self.filename).absolute()
         self.action = Action(jconfig.bot, host=jconfig.host, port=jconfig.port)
 
     def encryption_zip_aes(self):
-        if not pyzipper.is_zipfile(self.filePath):
+        if not pyzipper.is_zipfile(self.zip_cache_dir):
             self.action.sendGroupText(self.groupid, "解压出错")
             return
-        with pyzipper.ZipFile(self.filePath, 'r') as f:
+        with pyzipper.ZipFile(self.zip_cache_dir, 'r') as f:
             f.extractall(self.pic_cache_dir)
         files = [_ for _ in self.pic_cache_dir.iterdir()]
         # print(files)
-        with pyzipper.AESZipFile(self.zip_cache_dir / self.filename, "w", compression=pyzipper.ZIP_BZIP2,
+        self.zip_cache_dir.unlink()  # 删除无密码的压缩包
+        with pyzipper.AESZipFile(self.zip_cache_dir, "w", compression=pyzipper.ZIP_BZIP2,
                                  compresslevel=9) as zf:
             zf.setpassword(str(self.ctx.CurrentQQ).encode())
             zf.setencryption(pyzipper.WZ_AES, nbits=128)
             for file in files:
                 zf.write(filename=file, arcname=file.name)
 
+        shutil.rmtree(self.pic_cache_dir)  # 删除解压出来的图片
+
     def send(self):
         self.encryption_zip_aes()
         self.action.sendGroupText(
             self.groupid,
-            f"{self.filename}\r\n大小:{round(Path(self.zip_cache_dir / self.filename).stat().st_size / 1024 / 1024, 2)}MB\r\n解压密码为Bot的QQ号"
+            f"{self.filename}\r\n大小:{round(Path(self.zip_cache_dir).stat().st_size / 1024 / 1024, 2)}MB\r\n解压密码为Bot的QQ号"
         )
         logger.warning("开始上传群文件")
         # self.action.uploadGroupFile(self.groupid, filePath="/root/health_sign/testfile.txt")
-        self.action.uploadGroupFile(self.groupid, filePath=str(self.zip_cache_dir / self.filename))
+        self.action.uploadGroupFile(self.groupid, filePath=str(self.zip_cache_dir))
 
     @retry(stop=stop_after_attempt(3), retry_error_callback=lambda
             retry_state: print("下载error"))
@@ -74,7 +78,7 @@ class DownloadArchive(threading.Thread):
         logger.warning(f"开始下载{self.filename}")
         with httpx.Client(headers=headers, cookies=cookies, proxies=proxies, transport=transport) as client:
             res = client.get(self.url).content
-            with open(self.filePath, 'wb') as f:
+            with open(self.zip_cache_dir, 'wb') as f:
                 f.write(res)
         logger.warning(f"{self.filename}下载完成")
 
