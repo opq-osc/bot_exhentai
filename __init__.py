@@ -9,7 +9,7 @@ __doc__ = "ExHentai的一些功能"
 
 handler_ex = SessionHandler(
     ignore_botself, startswith("exfunc"), expiration=300
-).receive_group_msg().receive_friend_msg()
+).receive_group_msg()
 
 
 @handler_ex.receive
