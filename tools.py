@@ -68,7 +68,8 @@ class DownloadArchive(threading.Thread):
             f"{self.filename}\r\n大小:{round(self.zip_cache_dir.stat().st_size / 1024 / 1024, 2)}MB\r\n解压密码为Bot的QQ号"
         )
         logger.warning("开始上传群文件")
-        self.action.uploadGroupFile(self.groupid, filePath=str(self.zip_cache_dir))
+        res = self.action.uploadGroupFile(self.groupid, filePath=str(self.zip_cache_dir))
+        logger.warning(res)
         # self.action.uploadGroupFile(self.groupid, filePath="/root/health_sign/testfile.txt")
         self.action.sendGroupText(self.groupid, "上传ing~")
 
