@@ -144,7 +144,6 @@ class DrawIndexPage:
         for line in range(self.ONE_LINE_MAX):
             y_tmp = 20
             for i in range(line, self.counts, 3):
-                print(i)
                 y_tmp += (self.images[i].size[1] + self.text_sizes[i][1] + self.pic_with_text_gap * 2)
             if y_tmp > Y_MAX:
                 Y_MAX = y_tmp
@@ -180,9 +179,9 @@ class DrawIndexPage:
             background.paste(self.images[i], (self.pic_coordinates[i][0], self.pic_coordinates[i][1]))
         draw = ImageDraw.Draw(background)
         for i in range(self.counts):
-            print(self.processed_texts[i])
+            # print(self.processed_texts[i])
             draw.multiline_text(self.text_coordinates[i], text=self.processed_texts[i], font=self.font, fill='black')
-        print(time.time() - start_time)
+        logger.info(f"画图用时: {time.time() - start_time}")
         # background.show()
         with BytesIO() as bf:
             background.save(bf, format="JPEG", quality=80)

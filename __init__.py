@@ -62,6 +62,8 @@ def main():
             session.send_text("无结果")
     session.set("flag", True)
     while True:
-        word = session.pop("word", wait=True, timeout=300, default="退出")
-        if word == "退出":
+        word = session.pop("word", wait=True, timeout=400, default=None)
+        if word is None:
+            handler_ex.finish()
+        elif word == "退出":
             handler_ex.finish("已退出")
