@@ -33,7 +33,7 @@ def download_to_bytes(url, client: httpx.Client) -> bytes:
 class DownloadArchive(threading.Thread):
     def __init__(self, groupid, url, filename: str):
         threading.Thread.__init__(self)
-        self._daemonic = False
+        # self._daemonic = False
         self.groupid = groupid
         self.ctx = _ctx.get()
         self.url = url
