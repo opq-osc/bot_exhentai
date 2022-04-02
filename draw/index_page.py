@@ -7,17 +7,20 @@ from typing import List
 
 import httpx
 from PIL import Image, ImageDraw, ImageFont
-from botoy import logger
+from botoy import logger, jconfig
 from botoy.pool import WorkerPool
 
 from .._proxies import transport, proxies
-from ..files.config import config
 from ..tools import download_to_bytes
 
 curFileDir = Path(__file__).parent  # 当前文件路径
 
-headers = config.headers
-cookies = config.cookies
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 Edg/96.0.1054.62",
+    "Referer": "https://exhentai.org/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+}
+cookies = jconfig['exhentai.cookies']
 
 
 class DrawIndexPage:

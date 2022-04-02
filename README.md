@@ -8,11 +8,23 @@
 
 1. 在botoy的plugins文件夹下git clone本项目
 
-2. 然后把files里config.json的cookie补全
+2. botoy.json添加下面的配置参数并补全
 
 3. 如果机子上不了外网的话要在botoy.json里配置代理([指南](https://github.com/opq-osc/OPQ-SetuBot/wiki/%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6#opq-setubotbotoyjson))
 
 4. 启动Bot
+
+**botoy.json中需要添加的参数**
+
+```
+  "exhentai.ONE_LINE_MAX": 3,
+  "exhentai.cookies": {
+    "ipb_member_id": "",
+    "ipb_pass_hash": "",
+    "yay": "louder",
+    "igneous": ""
+  }
+```
 
 ### 功能:
 

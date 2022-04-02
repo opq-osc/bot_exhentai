@@ -5,19 +5,23 @@ from functools import lru_cache
 import httpx
 
 from ._proxies import transport, proxies
-from .files.config import config
+from botoy import jconfig
 
 # curFileDir = Path(__file__).parent  # 当前文件路径
 
-headers = config.headers
-cookies = config.cookies
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 Edg/96.0.1054.62",
+    "Referer": "https://exhentai.org/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+}
+cookies = jconfig['exhentai.cookies']
 
 
 class ExApi:
     def __init__(self):
         self.client = httpx.Client(headers=headers, cookies=cookies, proxies=proxies, transport=transport)
 
-    def ex_search(self,keywords: str, page: int = 0) -> tuple:
+    def ex_search(self, keywords: str, page: int = 0) -> tuple:
         """
         ex搜索
         :param page: 翻页的页码
@@ -57,7 +61,7 @@ class ExApi:
         self.client.get(download_choose_page_url, headers=headers, cookies=cookies)  # 正常走一下网页的流程,没有用
         return download_choose_page_url
 
-    def get_download_zipfile_url(self,download_page_url: str, original: bool = False):
+    def get_download_zipfile_url(self, download_page_url: str, original: bool = False):
         """
         返回zip压缩包的下载链接
         :param download_page_url: 选择画质的下载页面链接
@@ -65,15 +69,15 @@ class ExApi:
         :return:
         """
         download_url_data_last = self.client.post(download_page_url,
-                                            data={
-                                                "dltype": "org",
-                                                "dlcheck": "Download Original Archive"
-                                            } if original else {
-                                                "dltype": "res",
-                                                "dlcheck": "Download Resample Archive"
-                                            },
-                                            headers=headers,
-                                            cookies=cookies).text  # 最终的下载页面
+                                                  data={
+                                                      "dltype": "org",
+                                                      "dlcheck": "Download Original Archive"
+                                                  } if original else {
+                                                      "dltype": "res",
+                                                      "dlcheck": "Download Resample Archive"
+                                                  },
+                                                  headers=headers,
+                                                  cookies=cookies).text  # 最终的下载页面
         download_url = re.search(r'\"Please wait\.\.\.\";.*?document\.location = \"(.*?)\";', download_url_data_last,
                                  flags=re.S).group(1)  # 提取下载链接
         print(download_url)
@@ -81,7 +85,7 @@ class ExApi:
         filename = re.search(r'<strong>(.*?)</strong>', filename_info).group(1)
         return download_url + "?start=1", filename
 
-    def get_archive_tags(self,url: str):
+    def get_archive_tags(self, url: str):
         print(url)
         html = self.get_archive_html(url)
         tags = re.findall(r"toggle_tagmenu\('(.*?)',this\)", html, flags=re.S)  # 提取tag
