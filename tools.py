@@ -4,18 +4,22 @@ from pathlib import Path
 
 import httpx
 import pyzipper
-from botoy import logger, Action, jconfig
+from botoy import jconfig
+from botoy import logger, Action
 from botoy.contrib import get_cache_dir
 from botoy.session.globals import _ctx
 from tenacity import retry, stop_after_attempt
 
 from ._proxies import transport, proxies
-from .files.config import config
 
 # curFileDir = Path(__file__).parent  # 当前文件路径
 
-headers = config.headers
-cookies = config.cookies
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 Edg/96.0.1054.62",
+    "Referer": "https://exhentai.org/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+}
+cookies = jconfig['exhentai.cookies']
 
 curFileDir = Path(__file__).parent  # 当前文件路径
 
